@@ -80,7 +80,7 @@ export function WeeklySummaryView({
           {logsForWeek.length > 0 ? (
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <RechartsBarChart 
+                <BarChart 
                   data={chartData} 
                   margin={{ top: 5, right: 0, left: -20, bottom: 5 }}
                   onClick={handleChartClick} // Add click handler to the chart
@@ -99,7 +99,7 @@ export function WeeklySummaryView({
                   <Legend wrapperStyle={{ fontSize: "0.875rem" }} />
                   <Bar dataKey="pomodorosCompleted" name="Completed" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} cursor="pointer" />
                   <Bar dataKey="pomodorosTarget" name="Goal" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} cursor="pointer" />
-                </RechartsBarChart>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
