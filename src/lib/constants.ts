@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   DAILY_LOGS: 'focusflow_daily_logs',
   POMODORO_SETTINGS: 'focusflow_pomodoro_settings',
   ACTIVE_TASK_ID: 'focusflow_active_task_id',
+  GOALS: 'focusflow_goals', // New key for goals
 };
 
 export const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {

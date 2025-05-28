@@ -7,6 +7,17 @@ export interface Task {
   createdAt: number; // timestamp
   completedAt?: number; // timestamp, set when isCompleted becomes true
   order: number;
+  goalId?: string; // New: Link to a goal
+}
+
+export interface Goal {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: number;
+  order: number;
+  isCompleted?: boolean;
+  completedAt?: number;
 }
 
 export interface DailyLog {
