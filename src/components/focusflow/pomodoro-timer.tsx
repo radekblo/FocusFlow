@@ -1,10 +1,11 @@
+
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { PomodoroSettings } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Play, Pause, RotateCcw, SkipForward, Settings, Coffee, Brain } from 'lucide-react';
+import { Play, Pause, RotateCcw, SkipForward, Settings, Coffee, Brain, Volume2, VolumeX } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -37,6 +38,10 @@ export function PomodoroTimer({ settings, onUpdateSettings, onPomodoroComplete, 
   const [pomodorosInSet, setPomodorosInSet] = useState(0);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [currentSettings, setCurrentSettings] = useState<PomodoroSettings>(settings);
+  const [isMuted, setIsMuted] = useState(false);
+
+  const workEndSoundRef = useRef<HTMLAudioElement | null>(null);
+  const breakEndSoundRef = useRef<HTMLAudioElement | null>(null);
 
   const { toast } = useToast();
 
@@ -66,6 +71,16 @@ export function PomodoroTimer({ settings, onUpdateSettings, onPomodoroComplete, 
     }
   }, [settings]);
 
+  useEffect(() => {
+    // Initialize Audio elements on client side
+    if (typeof window !== "undefined") {
+      workEndSoundRef.current = new Audio('/sounds/work-end-sound.wav');
+      workEndSoundRef.current.preload = 'auto';
+      breakEndSoundRef.current = new Audio('/sounds/break-end-sound.wav');
+      breakEndSoundRef.current.preload = 'auto';
+    }
+  }, []);
+
 
   useEffect(() => {
     // Update timer and session type if settings change
@@ -86,6 +101,14 @@ export function PomodoroTimer({ settings, onUpdateSettings, onPomodoroComplete, 
       const isWorkSession = sessionType === 'work';
       onPomodoroComplete(isWorkSession);
 
+      if (!isMuted) {
+        if (isWorkSession) {
+          workEndSoundRef.current?.play().catch(error => console.error("Error playing work end sound:", error));
+        } else {
+          breakEndSoundRef.current?.play().catch(error => console.error("Error playing break end sound:", error));
+        }
+      }
+
       if (isWorkSession) {
         setPomodorosInSet(prev => prev + 1);
         if ((pomodorosInSet + 1) % settings.pomodorosPerSet === 0) {
@@ -102,12 +125,12 @@ export function PomodoroTimer({ settings, onUpdateSettings, onPomodoroComplete, 
         resetTimer('work');
         toast({ title: "Back to Work!", description: "Let's get focused.", variant: "default" });
       }
-      // Optionally auto-start next session: setIsActive(true);
+      // Optionally auto-start next session: setIsActive(settings.autoStartNextSession);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, timer, sessionType, pomodorosInSet, settings, onPomodoroComplete, resetTimer, toast]);
+  }, [isActive, timer, sessionType, pomodorosInSet, settings, onPomodoroComplete, resetTimer, toast, isMuted]);
 
   const toggleTimer = () => setIsActive(!isActive);
 
@@ -158,7 +181,7 @@ export function PomodoroTimer({ settings, onUpdateSettings, onPomodoroComplete, 
     switch(sessionType) {
       case 'work': return { text: activeTaskName ? `Focus: ${activeTaskName}` : "Work Session", Icon: Brain, color: "text-primary" };
       case 'shortBreak': return { text: "Short Break", Icon: Coffee, color: "text-accent" };
-      case 'longBreak': return { text: "Long Break", Icon: Coffee, color: "text-green-400" };
+      case 'longBreak': return { text: "Long Break", Icon: Coffee, color: "text-green-400" }; // Using a different color for long break
       default: return { text: "Work Session", Icon: Brain, color: "text-primary" };
     }
   };
@@ -225,8 +248,13 @@ export function PomodoroTimer({ settings, onUpdateSettings, onPomodoroComplete, 
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <Button onClick={() => setIsMuted(!isMuted)} variant="outline" size="icon" className="h-10 w-10">
+            {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+            <span className="sr-only">{isMuted ? 'Unmute' : 'Mute'}</span>
+          </Button>
         </div>
       </CardContent>
     </Card>
   );
 }
+
