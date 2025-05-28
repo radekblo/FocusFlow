@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import type { DailyLog } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,8 +80,3 @@ export function DailyGoalSetter({ dailyLog, onUpdateGoals, isLoading }: DailyGoa
     </Card>
   );
 }
-
-// Need to add useState and useEffect imports for this component
-// import { useState, useEffect } from 'react'; at the top
-// This will be fixed in the actual file content if used.
-// For now, assuming it will be added.
