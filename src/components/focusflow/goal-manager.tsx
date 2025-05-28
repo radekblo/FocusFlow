@@ -4,7 +4,7 @@
 import type { Goal, Task } from '@/lib/types';
 import { useState, useMemo } from 'react';
 import { TaskItem } from './task-item';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button'; // Import buttonVariants
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -166,14 +166,65 @@ export function GoalManager({
 
         {sortedGoals.length > 0 && (
           <Accordion type="multiple" defaultValue={defaultAccordionValues} className="w-full">
-            {sortedGoals.map((goal, goalIndex) => (
+            {sortedGoals.map((goal, goalIndex) => {
+              const isFirstGoal = goalIndex === 0;
+              const isLastGoal = goalIndex === sortedGoals.length - 1;
+              return (
               <AccordionItem value={goal.id} key={goal.id} className="border-b-0 mb-3 rounded-lg bg-card shadow-md overflow-hidden">
                 <AccordionTrigger className="px-4 py-3 hover:bg-muted/50 rounded-t-lg transition-colors">
                   <div className="flex items-center gap-2 flex-grow">
                      <div className="flex flex-col items-center mr-2">
-                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.stopPropagation(); onReorderGoal(goal.id, 'up');}} disabled={goalIndex === 0}><ChevronUp className="h-4 w-4"/></Button>
+                        <div
+                          role="button"
+                          tabIndex={isFirstGoal ? -1 : 0}
+                          aria-disabled={isFirstGoal}
+                          className={cn(
+                            buttonVariants({ variant: "ghost", size: "icon" }),
+                            "h-5 w-5",
+                            isFirstGoal && "opacity-50 pointer-events-none"
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isFirstGoal) return;
+                            onReorderGoal(goal.id, 'up');
+                          }}
+                          onKeyDown={(e) => {
+                            if (isFirstGoal) return;
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              onReorderGoal(goal.id, 'up');
+                            }
+                          }}
+                        >
+                          <ChevronUp className="h-4 w-4"/>
+                        </div>
                         <FolderKanban className="h-5 w-5 text-primary my-1" />
-                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={(e) => { e.stopPropagation(); onReorderGoal(goal.id, 'down');}} disabled={goalIndex === sortedGoals.length - 1}><ChevronDown className="h-4 w-4"/></Button>
+                        <div
+                          role="button"
+                          tabIndex={isLastGoal ? -1 : 0}
+                          aria-disabled={isLastGoal}
+                          className={cn(
+                            buttonVariants({ variant: "ghost", size: "icon" }),
+                            "h-5 w-5",
+                            isLastGoal && "opacity-50 pointer-events-none"
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isLastGoal) return;
+                            onReorderGoal(goal.id, 'down');
+                          }}
+                          onKeyDown={(e) => {
+                            if (isLastGoal) return;
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              onReorderGoal(goal.id, 'down');
+                            }
+                          }}
+                        >
+                          <ChevronDown className="h-4 w-4"/>
+                        </div>
                     </div>
                     <div className="text-left">
                         <span className="font-semibold text-base">{goal.name}</span>
@@ -181,8 +232,44 @@ export function GoalManager({
                     </div>
                   </div>
                   <div className="flex items-center gap-1 ml-auto pl-2">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => {e.stopPropagation(); openEditGoalDialog(goal);}}><Edit2 className="h-4 w-4"/></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" onClick={(e) => { e.stopPropagation(); onDeleteGoal(goal.id);}}><Trash2 className="h-4 w-4"/></Button>
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      aria-disabled={false}
+                      className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-7 w-7")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditGoalDialog(goal);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          openEditGoalDialog(goal);
+                        }
+                      }}
+                    >
+                      <Edit2 className="h-4 w-4"/>
+                    </div>
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      aria-disabled={false}
+                      className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-7 w-7 hover:text-destructive")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteGoal(goal.id);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onDeleteGoal(goal.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4"/>
+                    </div>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-4 pb-4 pt-2 border-t">
@@ -204,7 +291,7 @@ export function GoalManager({
                   </div>
                 </AccordionContent>
               </AccordionItem>
-            ))}
+            )})}
           </Accordion>
         )}
         
